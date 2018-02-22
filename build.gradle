@@ -1,0 +1,191 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+        jcenter();
+        mavenCentral();
+    }
+    dependencies {
+        classpath 'org.ajoberstar:grgit:2.1.0'
+        classpath 'org.ajoberstar.reckon:reckon-gradle:0.3.0'
+        classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1';
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:1.4.17"
+    }
+}
+
+allprojects {
+    apply plugin: 'java'
+}
+
+apply plugin: "org.ajoberstar.grgit"
+apply plugin: "org.ajoberstar.reckon"
+apply plugin: 'com.bmuschko.nexus'
+apply plugin: "com.gorylenko.gradle-git-properties"
+
+group = "cl.daplay"
+description = "An idiomatic Java API for Surbtc REST services."
+
+targetCompatibility = '1.8'
+sourceCompatibility = '1.8'
+
+reckon {
+    normal = scopeFromProp()
+    preRelease = snapshotFromProp()
+}
+
+ext {
+    versionPattern = /\d+\.\d+\.\d+/
+}
+
+def requireReleaseVersion(alert = "") {
+    // execute if not snapshot and matches \d.\d.\d
+    def execute = !version.toString().contains("SNAPSHOT") && (version.toString() ==~ versionPattern)
+    if (!execute && alert) {
+        println alert
+    }
+    return execute;
+}
+
+task generateVersionFile {
+    description = 'Generates file "version.properties".'
+
+    doLast {
+        def out = new File(project.buildDir, "resources/main/version.properties")
+
+        def props = new Properties()
+        props.setProperty('version', project.version.toString())
+
+        props.store(out.newWriter(), null)
+    }
+}
+processResources.finalizedBy generateVersionFile
+
+task readmeUpdate {
+    description = 'Updates version in README.md'
+
+    onlyIf {
+        def alert = "README.md won't be updated, as $version is an SNAPSHOT version"
+        return requireReleaseVersion(alert)
+    }
+
+    // handle to README.md
+    def readme = new File(project.projectDir, "README.md")
+
+    // replace text in README.md
+    doLast {
+        def text = readme.text
+        readme.text = text.replaceAll versionPattern, version.toString()
+    }
+
+    // add, commit and push change
+    doLast {
+        grgit.add(patterns: ['README.md'])
+        grgit.commit(message: "chore(README.md) releases version: '${version.toString()}'.")
+        grgit.push()
+    }
+}
+
+// unused tasks added by plugin Reckon
+project.tasks.remove(reckonTagCreate)
+project.tasks.remove(reckonTagPush)
+
+task release {
+    onlyIf {
+        def alert = "task Release, won't be executed, as $version is an SNAPSHOT version"
+        return requireReleaseVersion(alert)
+    }
+
+    final String releaseName = "v${version}"
+    println "releasing: $releaseName"
+
+    doLast {
+        grgit.tag.add(name: releaseName, message: releaseName, annotate: true)
+        grgit.push(refsOrSpecs: ["refs/tags/${releaseName}"])
+    }
+
+}
+
+release.dependsOn build
+release.dependsOn readmeUpdate
+release.finalizedBy uploadArchives
+
+readmeUpdate.mustRunAfter(build)
+
+javadoc {
+    doLast {
+        // contents of "gtag.js" file will be inserted after every head
+        String gtag = file("gtag.js").text
+
+        // for each html
+        def files = fileTree(destinationDir).include('**/*.html')
+        files.each { file ->
+            def content = file.text
+
+            def indexOfHead = content.indexOf("<head>");
+            if (indexOfHead) {
+                // determines post of insertion (just after head element)
+                def insertIndex = indexOfHead + "<head>".length()
+
+                // replace file
+                file.text = new StringBuilder(content).insert(insertIndex, gtag).toString()
+            }
+        }
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+
+dependencies {
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.9'
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.8.9'
+    compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.8.9'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+test {
+    testLogging.showStandardStreams = true
+
+    final boolean skipIntegration = project.hasProperty('skipIntegration') && Boolean.parseBoolean(project.getProperty('skipIntegration'));
+    final boolean integrationConfiguration = project.hasProperty('jsurbtc.secret') && project.hasProperty('jsurbtc.key')
+
+    if (skipIntegration || !integrationConfiguration) {
+        exclude { it.name.endsWith('_IT.class') }
+    }
+}
+
+modifyPom {
+    project {
+
+        name project.name
+        description project.description
+        url 'https://github.com/daplay/jsurbtc'
+
+        scm {
+            url 'https://github.com/daplay/jsurbtc'
+            connection 'scm:https://github.com/daplay/jsurbtc.git'
+            developerConnection 'scm:git://github.com/daplay/jsurbtc.git'
+        }
+
+        licenses {
+            license {
+                name 'The Apache Software License, Version 2.0'
+                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            }
+        }
+
+        developers {
+            developer {
+                id 'daplay'
+                name 'Daniel Meneses'
+                email 'daplay@gmail.com'
+            }
+        }
+    }
+}

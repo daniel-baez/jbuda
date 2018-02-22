@@ -1,0 +1,11 @@
+.DS_Store
+.gradle/
+.idea/
+build/
+out/
+jsurbtc.iml
+/bin/
+.classpath
+.project
+.settings/
+
