@@ -10,13 +10,13 @@ import cl.daplay.jbuda.JBuda;
 JBuda buda = new JBuda(apiKey, apiSecret);
 
 // create order
-Order order = buda.createOrder(MarketID.BTC_CLP, OrderType.BID, OrderPriceType.LIMIT, BigDecimal.ONE, BigDecimal.ONE);
+Order order = buda.createOrder("btc-clp", "bid", "limit", BigDecimal.ONE, BigDecimal.ONE);
 
 // cancel order
 buda.cancelOrder(order.getId());
 
 // get all orders
-List<Order> orders = buda.getOrders(MarketID.BTC_CLP);
+List<Order> orders = buda.getOrders("btc-clp");
 
 ```
 
