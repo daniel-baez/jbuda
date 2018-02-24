@@ -154,13 +154,6 @@ dependencies {
 
 test {
     testLogging.showStandardStreams = true
-
-    final boolean skipIntegration = project.hasProperty('skipIntegration') && Boolean.parseBoolean(project.getProperty('skipIntegration'));
-    final boolean integrationConfiguration = project.hasProperty('jbuda.secret') && project.hasProperty('jbuda.key')
-
-    if (skipIntegration || !integrationConfiguration) {
-        exclude { it.name.endsWith('_IT.class') }
-    }
 }
 
 modifyPom {
