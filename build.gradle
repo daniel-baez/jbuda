@@ -24,7 +24,7 @@ apply plugin: 'com.bmuschko.nexus'
 apply plugin: "com.gorylenko.gradle-git-properties"
 
 group = "cl.daplay"
-description = "An idiomatic Java API for Surbtc REST services."
+description = "Java API for Buda.com REST services."
 
 targetCompatibility = '1.8'
 sourceCompatibility = '1.8'
@@ -142,6 +142,9 @@ allprojects {
 
 
 dependencies {
+    compile group: 'cl.daplay', name: 'lazylist', version: '1.0.1'
+    compile group: 'cl.daplay', name: 'jfun', version: '1.0.0'
+
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.9'
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jdk8', version: '2.8.9'
     compile group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.8.9'
@@ -153,7 +156,7 @@ test {
     testLogging.showStandardStreams = true
 
     final boolean skipIntegration = project.hasProperty('skipIntegration') && Boolean.parseBoolean(project.getProperty('skipIntegration'));
-    final boolean integrationConfiguration = project.hasProperty('jsurbtc.secret') && project.hasProperty('jsurbtc.key')
+    final boolean integrationConfiguration = project.hasProperty('jbuda.secret') && project.hasProperty('jbuda.key')
 
     if (skipIntegration || !integrationConfiguration) {
         exclude { it.name.endsWith('_IT.class') }
@@ -165,12 +168,12 @@ modifyPom {
 
         name project.name
         description project.description
-        url 'https://github.com/daplay/jsurbtc'
+        url 'https://github.com/daplay/jbuda'
 
         scm {
-            url 'https://github.com/daplay/jsurbtc'
-            connection 'scm:https://github.com/daplay/jsurbtc.git'
-            developerConnection 'scm:git://github.com/daplay/jsurbtc.git'
+            url 'https://github.com/daplay/jbuda'
+            connection 'scm:https://github.com/daplay/jbuda.git'
+            developerConnection 'scm:git://github.com/daplay/jbuda.git'
         }
 
         licenses {

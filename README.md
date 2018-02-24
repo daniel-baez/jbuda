@@ -1,33 +1,33 @@
-# This is a work in progress ![travis-ci](https://travis-ci.org/daplay/jsurbtc.svg?branch=master)
+# This is a work in progress ![travis-ci](https://travis-ci.org/daplay/jbuda.svg?branch=master)
 
 Java client for buda.com REST API
 
 ## Usage
 
 ```java
-import cl.daplay.jsurbtc.JSurbtc;
+import cl.daplay.jbuda.JBuda;
 
-JSurbtc surbtc = new JSurbtc(apiKey, apiSecret);
+JBuda buda = new JBuda(apiKey, apiSecret);
 
 // create order
-Order order = surbtc.createOrder(MarketID.BTC_CLP, OrderType.BID, OrderPriceType.LIMIT, BigDecimal.ONE, BigDecimal.ONE);
+Order order = buda.createOrder(MarketID.BTC_CLP, OrderType.BID, OrderPriceType.LIMIT, BigDecimal.ONE, BigDecimal.ONE);
 
 // cancel order
-surbtc.cancelOrder(order.getId());
+buda.cancelOrder(order.getId());
 
 // get all orders
-List<Order> orders = surbtc.getOrders(MarketID.BTC_CLP);
+List<Order> orders = buda.getOrders(MarketID.BTC_CLP);
 
 ```
 
 ```java
-import cl.daplay.jsurbtc.JSurbtc;
+import cl.daplay.jbuda.JBuda;
 
 // this allows to call public APIs only
-JSurbtc surbtc = new JSurbtc();
+JBuda buda = new JBuda();
 
 // GET /markets
-List<Market> markets = surbtc.getMarkets();
+List<Market> markets = buda.getMarkets();
 ```
 
 
@@ -36,32 +36,32 @@ List<Market> markets = surbtc.getMarkets();
 ```xml
 <dependency>
    <groupId>cl.daplay</groupId>
-   <artifactId>jsurbtc</artifactId>
+   <artifactId>jbuda</artifactId>
    <version>4.3.0</version>
 </dependency>
 ```
 
 ```groovy
-compile group: 'cl.daplay', name: 'jsurbtc', version: '4.3.0'
+compile group: 'cl.daplay', name: 'jbuda', version: '4.3.0'
 ```
    
 # Documentation
 
-- [Javadoc](http://docs.daplay.cl/jsurbtc/cl/daplay/jsurbtc/JSurbtc.html)
-- [Official API Docs](http://api.surbtc.com/)
+- [Javadoc](http://docs.daplay.cl/jbuda/cl/daplay/jbuda/JBuda.html)
+- [Official API Docs](http://api.buda.com/)
 
 # Testing
 
 To run integration tests (those ended in _IT.java), you'll need to add the following settings to your $HOME/.gradle/gradle.properties
 
-- `jsurbtc.key`
-- `jsurbtc.secret`
-- `jsurbtc.proxy.host` OPTIONAL
-- `jsurbtc.proxy.port` OPTIONAL
+- `jbuda.key`
+- `jbuda.secret`
+- `jbuda.proxy.host` OPTIONAL
+- `jbuda.proxy.port` OPTIONAL
 
 # Todo
 
-- Remove cl.daplay.jsurbtc.jackson dependency
+- Remove cl.daplay.jbuda.jackson dependency
 - Extract public API
 
 # Errors
