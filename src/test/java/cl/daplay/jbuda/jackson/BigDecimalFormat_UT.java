@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
-import static cl.daplay.jbuda.JBuda.newBigDecimalFormat;
+import static cl.daplay.jbuda.Constants.newBigDecimalFormat;
 import static org.junit.Assert.assertEquals;
 
 public final class BigDecimalFormat_UT {

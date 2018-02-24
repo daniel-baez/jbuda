@@ -11,7 +11,7 @@ public class Nonce_UT {
 
     @Test
     public void nonce_returns_incremental_values() {
-        final LongSupplier nonceSupplier = JBuda.newNonce();
+        final LongSupplier nonceSupplier = Constants.newNonce();
         final int iterations = 1000000;
 
         long last = -1;

@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
-import static cl.daplay.jbuda.JBuda.newBigDecimalFormat;
+import static cl.daplay.jbuda.Constants.newBigDecimalFormat;
 
 public final class BigDecimalToStringSerializer extends JsonSerializer<BigDecimal> {
 

@@ -1,6 +1,6 @@
 package cl.daplay.jbuda.jackson;
 
-import cl.daplay.jbuda.JBuda;
+import cl.daplay.jbuda.Constants;
 import cl.daplay.jbuda.JSON;
 import cl.daplay.jbuda.jackson.dto.*;
 import cl.daplay.jbuda.model.ApiKey;
@@ -45,7 +45,7 @@ public enum JacksonJSON implements JSON {
     }
 
     private final ObjectMapper objectMapper = newObjectMapper();
-    private final DecimalFormat decimalFormat = JBuda.newBigDecimalFormat();
+    private final DecimalFormat decimalFormat = Constants.newBigDecimalFormat();
 
     @Override
     public String newAPIKey(String name, Instant expiration) throws IOException {

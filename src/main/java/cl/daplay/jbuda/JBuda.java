@@ -22,49 +22,16 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongSupplier;
 import java.util.logging.Logger;
 
 import static java.lang.String.format;
-import static java.lang.System.currentTimeMillis;
 
 public class JBuda {
 
-    /**
-     * @return default nonce implementation, can't be shared among clients
-     */
-    public static LongSupplier newNonce() {
-        return new AtomicLong(currentTimeMillis())::getAndIncrement;
-    }
-
-    public static DecimalFormat newBigDecimalFormat(){
-        final DecimalFormat format = new DecimalFormat();
-
-        final DecimalFormatSymbols decimalFormatSymbols = format.getDecimalFormatSymbols();
-        decimalFormatSymbols.setDecimalSeparator('.');
-
-        format.setMaximumFractionDigits(9);
-        format.setMinimumFractionDigits(1);
-        format.setGroupingUsed(false);
-        format.setDecimalFormatSymbols(decimalFormatSymbols);
-
-        return format;
-    }
-
     private final static Logger LOGGER = Logger.getLogger(JBuda.class.getName());
-
-    private final static VersionSupplier VERSION_SUPPLIER = VersionSupplier.INSTANCE;
-
-    /**
-     * by default, this client will retry any HTTP error 5 times, returning the fifth Exception.
-     *
-     * You may customize this number by environment variable "JBUDA.HTTP_MAX_RETRY"
-     */
-    private final static int HTTP_MAX_RETRY = Integer.parseInt(System.getProperty("JBUDA.HTTP_MAX_RETRY", "5"), 10);
 
     private final DecimalFormat bigDecimalFormat;
     private final HTTPClient httpClient;
@@ -73,19 +40,19 @@ public class JBuda {
     private final Signer noSignatureSigner;
 
     public JBuda() {
-        this(null, null, JBuda.newNonce(), null, HTTP_MAX_RETRY);
+        this(null, null, Constants.newNonce(), null, Constants.HTTP_MAX_RETRY);
     }
 
     public JBuda(final String key, final String secret) {
-        this(key, secret, JBuda.newNonce(), null, HTTP_MAX_RETRY);
+        this(key, secret, Constants.newNonce(), null, Constants.HTTP_MAX_RETRY);
     }
 
     public JBuda(final String key, final String secret, final LongSupplier nonceSupplier) {
-        this(key, secret, nonceSupplier, null, HTTP_MAX_RETRY);
+        this(key, secret, nonceSupplier, null, Constants.HTTP_MAX_RETRY);
     }
 
     public JBuda(final String key, final String secret, final LongSupplier nonceSupplier, final InetSocketAddress httpProxy) {
-        this(key, secret, nonceSupplier, JacksonJSON.INSTANCE, httpProxy == null ? null : new Proxy(Proxy.Type.HTTP, httpProxy), HTTP_MAX_RETRY);
+        this(key, secret, nonceSupplier, JacksonJSON.INSTANCE, httpProxy == null ? null : new Proxy(Proxy.Type.HTTP, httpProxy), Constants.HTTP_MAX_RETRY);
     }
 
     public JBuda(final String key, final String secret, final LongSupplier nonceSupplier, final InetSocketAddress httpProxy, int httpMaxRetry) {
@@ -93,8 +60,8 @@ public class JBuda {
     }
 
     public JBuda(final String key, final String secret, final LongSupplier nonceSupplier, final JacksonJSON json, final Proxy proxy, int httpMaxRetry) {
-        this(new RetryHTTPClient(new DefaultHTTPClient(proxy, key, nonceSupplier, VERSION_SUPPLIER.get()), httpMaxRetry),
-                newBigDecimalFormat(), 
+        this(new RetryHTTPClient(new DefaultHTTPClient(proxy, key, nonceSupplier, VersionSupplier.INSTANCE.get()), httpMaxRetry),
+                Constants.newBigDecimalFormat(),
                 json,
                 new DefaultSigner(secret),
                 NOOPSigner.INSTANCE);
@@ -217,7 +184,7 @@ public class JBuda {
     }
 
     public String getVersion() {
-        return VERSION_SUPPLIER.get();
+        return VersionSupplier.INSTANCE.get();
     }
 
     // ** implementation methods **
