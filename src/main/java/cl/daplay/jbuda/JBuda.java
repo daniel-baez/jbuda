@@ -2,7 +2,6 @@ package cl.daplay.jbuda;
 
 import cl.daplay.jbuda.http.DefaultHTTPClient;
 import cl.daplay.jbuda.http.RetryHTTPClient;
-import cl.daplay.jbuda.jackson.JacksonJSON;
 import cl.daplay.jbuda.model.ApiKey;
 import cl.daplay.jbuda.model.Page;
 import cl.daplay.jbuda.model.Ticker;
@@ -52,14 +51,14 @@ public class JBuda {
     }
 
     public JBuda(final String key, final String secret, final LongSupplier nonceSupplier, final InetSocketAddress httpProxy) {
-        this(key, secret, nonceSupplier, JacksonJSON.INSTANCE, httpProxy == null ? null : new Proxy(Proxy.Type.HTTP, httpProxy), Constants.HTTP_MAX_RETRY);
+        this(key, secret, nonceSupplier, Constants.newJSON(), httpProxy == null ? null : new Proxy(Proxy.Type.HTTP, httpProxy), Constants.HTTP_MAX_RETRY);
     }
 
     public JBuda(final String key, final String secret, final LongSupplier nonceSupplier, final InetSocketAddress httpProxy, int httpMaxRetry) {
-        this(key, secret, nonceSupplier, JacksonJSON.INSTANCE, httpProxy == null ? null : new Proxy(Proxy.Type.HTTP, httpProxy), httpMaxRetry);
+        this(key, secret, nonceSupplier, Constants.newJSON(), httpProxy == null ? null : new Proxy(Proxy.Type.HTTP, httpProxy), httpMaxRetry);
     }
 
-    public JBuda(final String key, final String secret, final LongSupplier nonceSupplier, final JacksonJSON json, final Proxy proxy, int httpMaxRetry) {
+    public JBuda(final String key, final String secret, final LongSupplier nonceSupplier, final JSON json, final Proxy proxy, int httpMaxRetry) {
         this(new RetryHTTPClient(new DefaultHTTPClient(proxy, key, nonceSupplier, VersionSupplier.INSTANCE.get()), httpMaxRetry),
                 Constants.newBigDecimalFormat(),
                 json,
@@ -90,14 +89,28 @@ public class JBuda {
     public ApiKey newAPIKey(final String name, final Instant expiration) throws Exception {
         final String path = "/api/v2/api_keys";
 
-        return httpClient.post(path, defaultSigner, json.newAPIKey(name, expiration), responseHandler(json::apiKey));
+        return httpClient.post(path, defaultSigner, json.newAPIKey(name, expiration), wrapExceptionHandling(json::apiKey));
     }
 
-    public Order newOrder(final String marketId, final String orderType, final String orderPriceType, final BigDecimal qty, final BigDecimal price) throws Exception {
+    /**
+     *
+     * @param marketId La ID del mercado (Ej: “btc-clp”, “btc-cop”)
+     * @param orderType Dirección de la orden (Ej: “Bid”, “Ask”)
+     * @param orderPriceType Tipo de orden (Ej: “limit”, “market”)
+     * @param qty Cantidad de la orden
+     * @param price Precio de la orden
+     * @return
+     * @throws Exception
+     */
+    public Order newOrder(final String marketId,
+                          final String orderType,
+                          final String orderPriceType,
+                          final BigDecimal qty,
+                          final BigDecimal price) throws Exception {
         final String path = format("/api/v2/markets/%s/orders", marketId).toLowerCase();
         final String payload = json.newOrder(marketId, orderType, orderPriceType, qty, price);
 
-        return httpClient.post(path, defaultSigner, payload, responseHandler(json::order));
+        return httpClient.post(path, defaultSigner, payload, wrapExceptionHandling(json::order));
     }
 
     public Trades getTrades(final String marketId) throws Exception {
@@ -111,7 +124,7 @@ public class JBuda {
             path += "?timestamp=" + timestamp.toEpochMilli();
         }
 
-        return httpClient.get(path, noSignatureSigner, responseHandler(json::trades));
+        return httpClient.get(path, noSignatureSigner, wrapExceptionHandling(json::trades));
     }
 
     public Order cancelOrder(final long orderId) throws Exception {
@@ -120,31 +133,31 @@ public class JBuda {
 
         String payload = json.cancelOrder(orderId);
 
-        return httpClient.put(path, defaultSigner, payload, responseHandler(json::order));
+        return httpClient.put(path, defaultSigner, payload, wrapExceptionHandling(json::order));
     }
 
     public List<Market> getMarkets() throws Exception {
         final String path = "/api/v2/markets";
-        return httpClient.get(path, noSignatureSigner, responseHandler(json::markets));
+        return httpClient.get(path, noSignatureSigner, wrapExceptionHandling(json::markets));
     }
 
     public Ticker getTicker(final String marketId) throws Exception {
         final String path = format("/api/v2/markets/%s/ticker", marketId).toLowerCase();
-        return httpClient.get(path, noSignatureSigner, responseHandler(json::ticker));
+        return httpClient.get(path, noSignatureSigner, wrapExceptionHandling(json::ticker));
     }
 
     public OrderBook getOrderBook(final String marketId) throws Exception {
         final String path = format("/api/v2/markets/%s/order_book", marketId).toLowerCase();
-        return httpClient.get(path, noSignatureSigner, responseHandler(json::orderBook));
+        return httpClient.get(path, noSignatureSigner, wrapExceptionHandling(json::orderBook));
     }
 
     public Balance getBalance(final String currency) throws Exception {
         final String path = format("/api/v2/balances/%s", currency).toLowerCase();
-        return httpClient.get(path, defaultSigner, responseHandler(json::balance));
+        return httpClient.get(path, defaultSigner, wrapExceptionHandling(json::balance));
     }
 
     public List<Balance> getBalances() throws Exception {
-        return httpClient.get("/api/v2/balances", defaultSigner, responseHandler(json::balances));
+        return httpClient.get("/api/v2/balances", defaultSigner, wrapExceptionHandling(json::balances));
     }
 
     public List<Order> getOrders(final String marketId) throws Exception {
@@ -170,7 +183,7 @@ public class JBuda {
     public Order getOrder(final long orderId) throws Exception {
         checkOrderId(orderId);
         final String path = format("/api/v2/orders/%d", orderId).toLowerCase();
-        return httpClient.get(path, defaultSigner, responseHandler(json::order));
+        return httpClient.get(path, defaultSigner, wrapExceptionHandling(json::order));
     }
 
     public List<Deposit> getDeposits(final String currency) throws Exception {
@@ -192,7 +205,7 @@ public class JBuda {
     private <T> LazyList<T> newPaginatedList(String path,
                                              Signer signer,
                                              ThrowingFunction<String, List<T>> parseList) throws Exception {
-        return httpClient.get(path, signer, responseHandler((responseBody) -> {
+        return httpClient.get(path, signer, wrapExceptionHandling((responseBody) -> {
             final List<T> page = parseList.apply(responseBody);
             final Page pagination = json.page(responseBody);
 
@@ -203,7 +216,7 @@ public class JBuda {
                 final boolean append = path.contains("?");
                 final String nextPath = format("%s%spage=%d", path, append ? "&" : "?", index + 1);
 
-                return httpClient.get(nextPath, signer, responseHandler(parseList));
+                return httpClient.get(nextPath, signer, wrapExceptionHandling(parseList));
             }, totalPages, totalCount);
         }));
     }
@@ -214,7 +227,7 @@ public class JBuda {
         }
     }
 
-    private <T> HTTPClient.HTTPResponseHandler<T> responseHandler(final ThrowingFunction<String, T> mapper) {
+    private <T> HTTPClient.HTTPResponseHandler<T> wrapExceptionHandling(final ThrowingFunction<String, T> mapper) {
         return (statusCode, responseBody) -> {
             // OK(200) or CREATED(201)
             final boolean successful = statusCode == 200 || statusCode == 201;

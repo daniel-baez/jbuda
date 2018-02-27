@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-public class JBuda_IT {
+public class JBuda_PublicAPI_IT {
 
     JBuda buda;
 

@@ -12,47 +12,46 @@ import cl.daplay.jbuda.model.OrderBook;
 import cl.daplay.jbuda.model.Trades;
 import cl.daplay.jbuda.model.Withdrawal;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
 public interface JSON {
 
-    String newAPIKey(String name, Instant expiration) throws IOException;
+    String newAPIKey(String name, Instant expiration) throws Exception;
 
     String newOrder(String marketId,
                     String orderType,
                     String orderPriceType,
                     BigDecimal qty,
-                    BigDecimal price) throws IOException;
+                    BigDecimal price) throws Exception;
 
-    String cancelOrder(long orderId) throws IOException;
+    String cancelOrder(long orderId) throws Exception;
 
 
-    ApiKey apiKey(String json) throws IOException;
+    ApiKey apiKey(String json) throws Exception;
 
-    Order order(String json) throws IOException;
+    Order order(String json) throws Exception;
 
-    Ticker ticker(String json) throws IOException;
+    Ticker ticker(String json) throws Exception;
 
-    OrderBook orderBook(String json) throws IOException;
+    OrderBook orderBook(String json) throws Exception;
 
-    Balance balance(String json) throws IOException;
+    Balance balance(String json) throws Exception;
 
-    Trades trades(String json) throws IOException;
+    Trades trades(String json) throws Exception;
 
-    List<Market> markets(String json) throws IOException;
+    List<Market> markets(String json) throws Exception;
 
-    List<Balance> balances(String json) throws IOException;
+    List<Balance> balances(String json) throws Exception;
 
-    List<Order> orders(String json) throws IOException;
+    List<Order> orders(String json) throws Exception;
 
-    List<Deposit> deposits(String json) throws IOException;
+    List<Deposit> deposits(String json) throws Exception;
 
-    List<Withdrawal> withdrawls(String json) throws IOException;
+    List<Withdrawal> withdrawls(String json) throws Exception;
 
-    Page page(String json) throws IOException;
+    Page page(String json) throws Exception;
 
     JBudaException exception(int statusCode, String json) throws Exception;
 }

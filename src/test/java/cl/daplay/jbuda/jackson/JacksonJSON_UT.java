@@ -5,7 +5,6 @@ import cl.daplay.jbuda.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
@@ -21,7 +20,7 @@ public class JacksonJSON_UT {
     private final JSON json = JacksonJSON.INSTANCE;
 
     @Test
-    public void newAPIKey() throws IOException {
+    public void newAPIKey() throws Exception {
         Instant expiration = Instant.now();
         String name = UUID.randomUUID().toString();
 
@@ -36,7 +35,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void newOrder() throws IOException {
+    public void newOrder() throws Exception {
         Random random = new Random();
 
         String marketId = UUID.randomUUID().toString();
@@ -52,7 +51,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void cancelOrder() throws IOException {
+    public void cancelOrder() throws Exception {
         Random random = new Random();
 
         String out = json.cancelOrder(random.nextLong());
@@ -61,7 +60,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void apiKey() throws IOException {
+    public void apiKey() throws Exception {
         String jsonExample = convertStreamToString(getClass().getResourceAsStream("/api_key.json"));
         ApiKey apiKey = json.apiKey(jsonExample);
 
@@ -71,7 +70,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void markets() throws IOException {
+    public void markets() throws Exception {
         String jsonExample = convertStreamToString(getClass().getResourceAsStream("/markets.json"));
         List<Market> markets = json.markets(jsonExample);
 
@@ -79,7 +78,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void order() throws IOException {
+    public void order() throws Exception {
         String jsonExample = convertStreamToString(getClass().getResourceAsStream("/order.json"));
         Order order = json.order(jsonExample);
 
@@ -89,7 +88,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void ticker() throws IOException {
+    public void ticker() throws Exception {
         String jsonExample = convertStreamToString(getClass().getResourceAsStream("/ticker.json"));
         Ticker ticker = json.ticker(jsonExample);
 
@@ -97,7 +96,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void trades() throws IOException {
+    public void trades() throws Exception {
         for (int i = 1; i < 8; i++) {
             String fileName = format("/trades%d.json", i);
             String jsonExample = convertStreamToString(getClass().getResourceAsStream(fileName));
@@ -111,7 +110,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void order_book() throws IOException {
+    public void order_book() throws Exception {
         String jsonExample = convertStreamToString(getClass().getResourceAsStream("/order_book.json"));
         OrderBook orderBook = json.orderBook(jsonExample);
 
@@ -120,7 +119,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void balances() throws IOException {
+    public void balances() throws Exception {
         String jsonExample = convertStreamToString(getClass().getResourceAsStream("/balances.json"));
         List<Balance> balances = json.balances(jsonExample);
 
@@ -128,7 +127,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void balance() throws IOException {
+    public void balance() throws Exception {
         String jsonExample = convertStreamToString(getClass().getResourceAsStream("/balance.json"));
         Balance balance = json.balance(jsonExample);
 
@@ -136,7 +135,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void orders() throws IOException {
+    public void orders() throws Exception {
         List<String> filenames = Arrays.asList("/orders.json", "/orders2.json", "/orders_empty.json");
 
         for (String filename: filenames) {
@@ -152,7 +151,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void deposits() throws IOException {
+    public void deposits() throws Exception {
         List<String> filenames = Arrays.asList("/deposits_btc.json", "/deposits_clp.json", "/deposits_empty.json");
 
         for (String filename: filenames) {
@@ -168,7 +167,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void withdrawls() throws IOException {
+    public void withdrawls() throws Exception {
         List<String> filenames = Arrays.asList("/withdrawals_btc.json", "/withdrawals_clp.json", "/withdrawals_empty.json");
 
         for (String filename: filenames) {
@@ -185,7 +184,7 @@ public class JacksonJSON_UT {
     }
 
     @Test
-    public void page() throws IOException {
+    public void page() throws Exception {
         // List<String> filenames = Arrays.asList(
         //         "/withdrawals_btc.json",
         //         "/withdrawals_clp.json",

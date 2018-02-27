@@ -36,7 +36,7 @@ public enum JacksonJSON implements JSON {
     INSTANCE;
 
     public static ObjectMapper newObjectMapper() {
-        final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        final SimpleDateFormat simpleDateFormat = Constants.newDateFormat();
 
         return new ObjectMapper()
                 .setDateFormat(simpleDateFormat)
